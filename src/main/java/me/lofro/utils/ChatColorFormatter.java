@@ -7,7 +7,9 @@ import org.bukkit.ChatColor;
 
 public class ChatColorFormatter {
 
-    private static final String prefix = Cerdomania.prefix;
+    public static final String name = ChatColorFormatter.stringToString("&c&lCerdomania");
+
+    public static final String prefix = ChatColorFormatter.stringToString(name + " &r>> ");
 
     /**
      * Function that translates the given String into another String with ChatColor format.
