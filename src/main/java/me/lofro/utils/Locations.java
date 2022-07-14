@@ -1,7 +1,6 @@
 package me.lofro.utils;
 
 import org.bukkit.Location;
-import org.bukkit.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,18 +40,38 @@ public class Locations {
      *
      * Function to get the center location of a cube with two locations as radius.
      *
-     * @param world of the given locations.
      * @param pos1 first cube location.
      * @param pos2 second cube location.
      * @return Center location of the given cube.
      *
      */
-    public static Location getCubeCenter(World world, Location pos1, Location pos2) {
+    public static Location getCubeCenter(Location pos1, Location pos2) {
+        if (!pos1.getWorld().equals(pos2.getWorld())) throw new IllegalArgumentException("The given locations do not have the same world.");
+
         int x = ((pos1.getBlockX() + pos2.getBlockX()) / 2);
         int y = ((pos1.getBlockY() + pos2.getBlockY()) / 2);
         int z = ((pos2.getBlockZ() + pos1.getBlockZ()) / 2);
 
-        return new Location(world, x, y, z);
+        return new Location(pos1.getWorld(), x, y, z);
+    }
+
+    /**
+     *
+     * Function to get the center location in 2D (X and Z) of a cube with two locations as radius.
+     *
+     * @param pos1 first cube location.
+     * @param pos2 second cube location.
+     * @return Center location of the given cube with the lowest Y.
+     *
+     */
+    public static Location getCubeCenter2D(Location pos1, Location pos2) {
+        if (!pos1.getWorld().equals(pos2.getWorld())) throw new IllegalArgumentException("The given locations do not have the same world.");
+
+        int x = ((pos1.getBlockX() + pos2.getBlockX()) / 2);
+        int y = Math.min(pos1.getBlockY(), pos2.getBlockY()) + 1;
+        int z = ((pos2.getBlockZ() + pos1.getBlockZ()) / 2);
+
+        return new Location(pos1.getWorld(), x, y, z);
     }
 
     /**
