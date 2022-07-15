@@ -13,10 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleExitEvent;
 
 import java.util.LinkedList;
@@ -65,6 +62,20 @@ public class RaceListeners implements Listener {
     }
 
     @EventHandler
+    private void onGameModeChange(PlayerGameModeChangeEvent e) {
+        if (!gameManager.getGameStage().equals(GameStage.RUNNING)) return;
+
+        var player = e.getPlayer();
+        var gameMode = e.getNewGameMode();
+
+        if (gameMode != GameMode.SURVIVAL) player.setInvulnerable(true);
+
+        gameManager.loadPlayerFromGameMode(player, e.getNewGameMode());
+
+        if (gameMode != GameMode.SURVIVAL) Bukkit.getScheduler().runTaskLater(Cerdomania.getInstance(), () -> player.setInvulnerable(false), 5);
+    }
+
+    @EventHandler
     private void onPlayerJoin(PlayerJoinEvent e) {
         if (!gameManager.getGameStage().equals(GameStage.RUNNING)) return;
 
@@ -72,9 +83,9 @@ public class RaceListeners implements Listener {
 
         player.setInvulnerable(true);
 
-        gameManager.loadPlayer(player);
+        gameManager.loadDefaultPlayer(player, true);
 
-        Bukkit.getScheduler().runTaskLater(Cerdomania.getInstance(), () -> player.setInvulnerable(false), 20);
+        Bukkit.getScheduler().runTaskLater(Cerdomania.getInstance(), () -> player.setInvulnerable(false), 5);
     }
 
     @EventHandler
@@ -85,7 +96,7 @@ public class RaceListeners implements Listener {
 
         player.setInvulnerable(true);
 
-        gameManager.unloadPlayer(player);
+        gameManager.unloadDefaultPlayer(player, false);
     }
 
     @EventHandler
@@ -108,7 +119,7 @@ public class RaceListeners implements Listener {
                 } else {
                     mat = Material.WARPED_FUNGUS_ON_A_STICK;
                 }
-                return d.getType().equals(mat);
+                return (gameManager.isBeacon()) ? d.getType().equals(mat) || d.getType().equals(Material.BEACON) : d.getType().equals(mat);
             });
 
             e.getDrops().removeAll(raceItems.collect(Collectors.toCollection(LinkedList::new)));
@@ -136,7 +147,8 @@ public class RaceListeners implements Listener {
         if (player.getGameMode().equals(GameMode.SURVIVAL)) {
             gameManager.giveItems(player, gameManager.isBeacon());
 
-            var checkPointLocation = gameManager.getGameData().getRespawnLocations().get(player.getUniqueId());
+            var checkPoint = gameManager.getGameData().getRespawnLocations().get(player.getUniqueId());
+            var checkPointLocation = (checkPoint != null) ? checkPoint : e.getRespawnLocation();
 
             var passenger = player.getWorld().spawnEntity(checkPointLocation, gameManager.getRaceType().getEntityType());
             passenger.addPassenger(player);

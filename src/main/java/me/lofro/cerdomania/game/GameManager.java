@@ -77,24 +77,36 @@ public class GameManager implements Restorable {
         this.raceType = raceType;
         this.beacon = beacon;
 
-        Bukkit.getOnlinePlayers().forEach(this::loadPlayer);
+        Bukkit.getOnlinePlayers().forEach(p -> loadDefaultPlayer(p, true));
     }
 
     public void stopRace() {
         this.gameStage = GameStage.FINISHED;
 
-        Bukkit.getOnlinePlayers().forEach(this::unloadPlayer);
+        Bukkit.getOnlinePlayers().forEach(p -> unloadDefaultPlayer(p, true));
 
         this.beacon = false;
         this.raceType = null;
     }
 
-    public void loadPlayer(Player p) {
+    public void loadPlayerFromGameMode(Player p, GameMode newGameMode) {
+        if (newGameMode == GameMode.SURVIVAL) {
+            loadPlayer(p, true);
+        } else {
+            unloadPlayer(p, true);
+        }
+    }
+
+    public void loadDefaultPlayer(Player p, boolean giveItems) {
         if (!p.getGameMode().equals(GameMode.SURVIVAL)) return;
 
-        giveItems(p, this.beacon);
+        loadPlayer(p, giveItems);
+    }
 
-        if (p.getGameMode().equals(GameMode.SURVIVAL) && p.getVehicle() != null && p.getVehicle().getType().equals(raceType.getEntityType())) return;
+    private void loadPlayer(Player p, boolean giveItems) {
+        if (giveItems) giveItems(p, this.beacon);
+
+        if (p.getVehicle() != null && p.getVehicle().getType().equals(raceType.getEntityType())) return;
 
         var vehicle = (raceType.equals(RaceType.PIG)) ? p.getWorld().spawnEntity(p.getLocation(), EntityType.PIG) : p.getWorld().spawnEntity(p.getLocation(), EntityType.STRIDER);
 
@@ -103,10 +115,14 @@ public class GameManager implements Restorable {
         Scoreboards.addToRaceTeam(vehicle, p);
     }
 
-    public void unloadPlayer(Player p) {
+    public void unloadDefaultPlayer(Player p, boolean removeItems) {
         if (!p.getGameMode().equals(GameMode.SURVIVAL)) return;
 
-        removeItems(p, this.beacon);
+        unloadPlayer(p, removeItems);
+    }
+
+    private void unloadPlayer(Player p, boolean removeItems) {
+        if (removeItems) removeItems(p, this.beacon);
         Scoreboards.removeFromRaceTeam(p);
 
         if (!p.isInsideVehicle()) return;

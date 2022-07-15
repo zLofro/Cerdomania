@@ -9,8 +9,11 @@ import me.lofro.cerdomania.game.GameManager;
 import me.lofro.cerdomania.game.enums.GameStage;
 import me.lofro.cerdomania.game.enums.RaceType;
 import me.lofro.utils.ChatColorFormatter;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 
 import java.util.LinkedList;
 import java.util.stream.Collectors;
@@ -90,5 +93,32 @@ public class CerdomaniaCMD extends BaseCommand {
         sender.sendMessage(ChatColorFormatter.stringToComponentWithPrefix("&7Se ha eliminado la región [x:%d,y:%d,z:%d],[x:%d,y:%d,z:%d] del conjunto de checkpoints."
                 .formatted(l1.getBlockX(), l1.getBlockY(), l1.getBlockZ(), l2.getBlockX(), l2.getBlockY(), l2.getBlockZ())));
     }
+
+    @Subcommand("checkPointAll")
+    @CommandCompletion("@location")
+    private void checkPointAll(CommandSender sender, Location location) {
+        var gameData = gameManager.getGameData();
+
+        Bukkit.getOnlinePlayers().forEach(p -> gameData.getRespawnLocations().put(p.getUniqueId(), location));
+        sender.sendMessage(ChatColorFormatter.stringToComponentWithPrefix("&7Se ha establecido el checkpoint de todos los jugadores en [x:%d,y:%d,z:%d]."
+                .formatted(location.getBlockX(), location.getBlockY(), location.getBlockZ())));
+    }
+
+    @Subcommand("checkPointAll")
+    private void checkPointAll(CommandSender sender) {
+        var gameData = gameManager.getGameData();
+
+        if (!(sender instanceof Entity entity)) {
+            sender.sendMessage(ChatColorFormatter.stringToComponentWithPrefix("&cNo tienes un espacio físico en el mundo, por lo que tu localización no ha podido ser obtenida."));
+            return;
+        }
+
+        var location = entity.getLocation();
+
+        Bukkit.getOnlinePlayers().forEach(p -> gameData.getRespawnLocations().put(p.getUniqueId(), location));
+        sender.sendMessage(ChatColorFormatter.stringToComponentWithPrefix("&7Se ha establecido el checkpoint de todos los jugadores en [x:%d,y:%d,z:%d]."
+                .formatted(location.getBlockX(), location.getBlockY(), location.getBlockZ())));
+    }
+
 
 }

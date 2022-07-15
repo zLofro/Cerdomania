@@ -20,7 +20,7 @@ import java.nio.file.Paths;
  * @author zLofro
  */
 public class JsonConfig {
-    private Gson gson = new GsonBuilder().registerTypeAdapter(Location.class, new LocationSerializer())
+    private final Gson gson = new GsonBuilder().registerTypeAdapter(Location.class, new LocationSerializer())
             .registerTypeAdapter(Location[].class, LocationSerializer.getArraySerializer()).setPrettyPrinting()
             .serializeNulls()
             .setPrettyPrinting()
