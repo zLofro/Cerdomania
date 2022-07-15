@@ -18,6 +18,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
 public class GameManager implements Restorable {
@@ -138,11 +139,21 @@ public class GameManager implements Restorable {
     public void giveItems(Player player, boolean beacon) {
         if (beacon) player.getEquipment().setHelmet(new ItemStack(Material.BEACON));
         ItemStack item;
+        ItemStack i;
         if (raceType.equals(RaceType.PIG)) {
-            item = new ItemStack(Material.CARROT_ON_A_STICK);
+            i = new ItemStack(Material.CARROT_ON_A_STICK);
+            var m = i.getItemMeta();
+            m.setUnbreakable(true);
+            m.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+            i.setItemMeta(m);
         } else {
-            item = new ItemStack(Material.WARPED_FUNGUS_ON_A_STICK);
+            i = new ItemStack(Material.WARPED_FUNGUS_ON_A_STICK);
+            var m = i.getItemMeta();
+            m.setUnbreakable(true);
+            m.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+            i.setItemMeta(m);
         }
+        item = i;
         if (player.getInventory().contains(item.getType()) || player.getEquipment().getItemInOffHand().getType().equals(item.getType())) return;
         player.getInventory().addItem(item);
     }

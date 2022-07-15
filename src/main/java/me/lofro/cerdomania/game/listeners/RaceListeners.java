@@ -13,8 +13,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
 import org.bukkit.event.vehicle.VehicleExitEvent;
+import org.bukkit.inventory.PlayerInventory;
 
 import java.util.LinkedList;
 import java.util.stream.Collectors;
@@ -25,6 +28,17 @@ public class RaceListeners implements Listener {
 
     public RaceListeners(final GameManager gameManager) {
         this.gameManager = gameManager;
+    }
+
+    @EventHandler
+    private void onClick(InventoryClickEvent e) {
+        if (!gameManager.getGameStage().equals(GameStage.RUNNING)) return;
+
+        if (e.getClickedInventory() instanceof PlayerInventory) {
+            if (e.getSlotType().equals(InventoryType.SlotType.ARMOR)) {
+                e.setCancelled(true);
+            }
+        }
     }
 
     @EventHandler
